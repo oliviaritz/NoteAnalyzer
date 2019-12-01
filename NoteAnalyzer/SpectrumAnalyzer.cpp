@@ -8,6 +8,8 @@ SpectrumAnalyzer::SpectrumAnalyzer(std::shared_ptr<AudioDevice>& _audioDevice,
 	unsigned int _blockSize)
 	:	workUnit(std::make_unique<boost::asio::io_service::work>(ioService))
 	,	audioDevice(_audioDevice)
+    , leftSpectrum{ _blockSize / 2, audioDevice->getSampleRate() }
+    , rightSpectrum{ _blockSize / 2, audioDevice->getSampleRate() }
 	,	chunkSize{audioDevice->getBlockSize()}
 	,	blockSize{_blockSize} {
 
@@ -67,44 +69,6 @@ Spectrum SpectrumAnalyzer::getRightSpectrum() const {
 	return rightSpectrum;
 }
 
-Spectrum SpectrumAnalyzer::getMonoSpectrum() const {
-	std::unique_lock<std::mutex> spectrumLock(spectrumMutex);
-
-	auto mono = leftSpectrum + rightSpectrum;
-
-	//Average
-	for(unsigned int i = 0; i < mono.getBinCount(); ++i) {
-		auto& bin = mono.getByIndex(i);
-		bin.setEnergy(bin.getEnergy() / 2.);
-	}
-
-	return mono;
-}
-
-Spectrum SpectrumAnalyzer::getCenterSpectrum() const {
-	std::unique_lock<std::mutex> spectrumLock(spectrumMutex);
-
-	auto center = leftSpectrum;
-/*
-	auto& leftBin = center.getByIndex(2);
-	auto& rightBin = right.getByIndex(2);
-
-	std::cout << leftBin.getEnergy() << " " << rightBin.getEnergy() << " "
-		<< std::max(0., leftBin.getEnergy() - rightBin.getEnergy()) << std::endl;
-*/
-
-	for(unsigned int i = 0; i < center.getBinCount(); ++i) {
-		auto& leftBin = center.getByIndex(i);
-		auto rightBin = rightSpectrum.getByIndexConst(i);
-		
-		double leftOnly = std::max(0., leftBin.getEnergy() - rightBin.getEnergy());
-		double rightOnly = std::max(0., rightBin.getEnergy() - leftBin.getEnergy());
-		leftBin.setEnergy(leftBin.getEnergy() - leftOnly);
-	}
-
-	return center;
-}
-
 void SpectrumAnalyzer::cbAudio(const int16_t* left, const int16_t* right) {
 	std::unique_lock<std::mutex> bufferLock(bufferMutex);
 
@@ -150,26 +114,9 @@ void SpectrumAnalyzer::fftRoutine(std::vector<int16_t> left,
 	fftw_execute(fftPlan);
 
 	//Fill left spectrum with new FFT data
-	leftSpectrum.clear();
-
 	for(unsigned int i = 0; i < blockSize/2; ++i) {
-		double f = sampleRate * i / blockSize; //Frequency of fft bin
-
-		try {
-			//Put the energy from this bin into the appropriate location
-			leftSpectrum.get(f).addEnergy(std::sqrt(sqr(fftOut[i][0]) +
-				sqr(fftOut[i][1])));
-		}
-		catch(const Exception& e) {
-			if(e.getErrorCode() != Spectrum::ERROR_BIN_NOT_FOUND) {
-				std::cout << "[Error] SpectrumAnalyzer::fftRoutine Exception caught: "
-					<< e.what() << std::endl;
-			}
-			else {
-				//This is not an error
-				//The frequency is not in the range of interest for the spectrum
-			}
-		}
+        leftSpectrum.m_bins[i] = std::sqrt(sqr(fftOut[i][0]) +
+            sqr(fftOut[i][1]));
 	}
 	
 	//Now do right FFT
@@ -188,31 +135,10 @@ void SpectrumAnalyzer::fftRoutine(std::vector<int16_t> left,
 	fftw_execute(fftPlan);
 
 	//Fill right spectrum with new FFT data
-	rightSpectrum.clear();
-
-	for(unsigned int i = 0; i < blockSize/2; ++i) {
-		double f = sampleRate * i / blockSize; //Frequency of fft bin
-
-		try {
-			//Put the energy from this bin into the appropriate location
-			rightSpectrum.get(f).addEnergy(std::sqrt(sqr(fftOut[i][0]) +
-				sqr(fftOut[i][1])));
-		}
-		catch(const Exception& e) {
-			if(e.getErrorCode() != Spectrum::ERROR_BIN_NOT_FOUND) {
-				std::cout << "[Error] SpectrumAnalyzer::cbAudio Exception caught: "
-					<< e.what() << std::endl;
-			}
-			else {
-				//This is not an error
-				//The frequency is not in the range of interest for the spectrum
-			}
-		}
-	}
-
-	//Update stats for both spectrums
-	leftSpectrum.updateStats();
-	rightSpectrum.updateStats();
+    for (unsigned int i = 0; i < blockSize / 2; ++i) {
+        leftSpectrum.m_bins[i] = std::sqrt(sqr(fftOut[i][0]) +
+            sqr(fftOut[i][1]));
+    }
 }
 
 void SpectrumAnalyzer::generateWindow() {

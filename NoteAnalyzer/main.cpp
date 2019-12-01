@@ -10,7 +10,7 @@ constexpr int AUDIO_BLOCK_SIZE = 1024;
 constexpr int SPECTRUM_BLOCK_SIZE = 4096;
 
 int main() {
-    auto audioDevice = std::make_shared<AudioDevice>(AudioDevice::DEFAULT_DEVICE, SAMPLE_RATE, BLOCK_SIZE);
+    auto audioDevice = std::make_shared<AudioDevice>(AudioDevice::DEFAULT_DEVICE, SAMPLE_RATE, AUDIO_BLOCK_SIZE);
     auto spectrumAnalyzer = std::make_shared<SpectrumAnalyzer>(audioDevice, SPECTRUM_BLOCK_SIZE);
 
     audioDevice->startStream();
