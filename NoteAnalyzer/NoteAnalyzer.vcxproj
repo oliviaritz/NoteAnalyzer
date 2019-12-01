@@ -118,7 +118,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AudioDevice.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PeriodicTimer.cpp" />
+    <ClCompile Include="SpectrumAnalyzer.cpp" />
+    <ClCompile Include="WatchdogTimer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AudioDevice.hpp" />
+    <ClInclude Include="PeriodicTimer.hpp" />
+    <ClInclude Include="SpectrumAnalyzer.hpp" />
+    <ClInclude Include="WatchdogTimer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -166,6 +176,8 @@
     <Import Project="..\packages\boost_wserialization-vc141.1.71.0.0\build\boost_wserialization-vc141.targets" Condition="Exists('..\packages\boost_wserialization-vc141.1.71.0.0\build\boost_wserialization-vc141.targets')" />
     <Import Project="..\packages\boost_zlib-vc141.1.71.0.0\build\boost_zlib-vc141.targets" Condition="Exists('..\packages\boost_zlib-vc141.1.71.0.0\build\boost_zlib-vc141.targets')" />
     <Import Project="..\packages\boost-vc141.1.71.0.0\build\boost-vc141.targets" Condition="Exists('..\packages\boost-vc141.1.71.0.0\build\boost-vc141.targets')" />
+    <Import Project="..\packages\portaudio.redist.0.19.1\build\native\portaudio.redist.targets" Condition="Exists('..\packages\portaudio.redist.0.19.1\build\native\portaudio.redist.targets')" />
+    <Import Project="..\packages\portaudio.0.19.1\build\native\portaudio.targets" Condition="Exists('..\packages\portaudio.0.19.1\build\native\portaudio.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -215,5 +227,7 @@
     <Error Condition="!Exists('..\packages\boost_wserialization-vc141.1.71.0.0\build\boost_wserialization-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_wserialization-vc141.1.71.0.0\build\boost_wserialization-vc141.targets'))" />
     <Error Condition="!Exists('..\packages\boost_zlib-vc141.1.71.0.0\build\boost_zlib-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_zlib-vc141.1.71.0.0\build\boost_zlib-vc141.targets'))" />
     <Error Condition="!Exists('..\packages\boost-vc141.1.71.0.0\build\boost-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost-vc141.1.71.0.0\build\boost-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\portaudio.redist.0.19.1\build\native\portaudio.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\portaudio.redist.0.19.1\build\native\portaudio.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\portaudio.0.19.1\build\native\portaudio.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\portaudio.0.19.1\build\native\portaudio.targets'))" />
   </Target>
 </Project>
