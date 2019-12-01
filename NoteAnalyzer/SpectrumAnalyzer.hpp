@@ -21,6 +21,9 @@ public:
 	float getMinFrequency() const;
 	float getMaxFrequency() const;
 
+    float getFrequencyOfBin(unsigned int bin) const;
+    unsigned int getBinOfFrequency(float freq) const;
+
 	float getPeakBinFrequency(float minFreq, float maxFreq) const;
 
 private:
@@ -56,6 +59,8 @@ private:
 	std::unique_ptr<boost::asio::io_service::work> workUnit;
 	std::thread asyncThread;
 
+    std::shared_ptr<AudioDevice> audioDevice;
+
 	Spectrum leftSpectrum, rightSpectrum;
 	mutable std::mutex spectrumMutex;
 
@@ -69,7 +74,6 @@ private:
 	std::vector<double> fftWindow;
 
 	//Audio device stuff
-	std::shared_ptr<AudioDevice> audioDevice;
 	unsigned int callbackID;
 	unsigned int chunkSize; //Size of buffer from audio device
 	unsigned int blockSize;	//Size of buffer sent through fft

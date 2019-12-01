@@ -16,8 +16,10 @@ int main() {
     audioDevice->startStream();
 
     while(true) {
-        std::cout << "Test" << std::endl;
+        auto peakFreq = spectrumAnalyzer->getLeftSpectrum().getPeakBinFrequency(200, 6000);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::cout << "Peak Frequency: " << peakFreq << std::endl;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }

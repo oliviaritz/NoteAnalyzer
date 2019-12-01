@@ -4,6 +4,36 @@
 
 using namespace std;
 
+Spectrum::Spectrum(unsigned int binCount, unsigned int sampleRate)
+    : m_bins(binCount)
+    , m_sampleRate{ sampleRate } {
+}
+
+float Spectrum::getMinFrequency() const {
+    return 0;
+}
+
+float Spectrum::getMaxFrequency() const {
+    return m_sampleRate / 2;
+}
+
+float Spectrum::getFrequencyOfBin(unsigned int bin) const {
+    return bin * m_sampleRate / (m_bins.size() * 2.f);
+}
+
+unsigned int Spectrum::getBinOfFrequency(float freq) const {
+    return freq * (m_bins.size() * 2.f) / m_sampleRate;
+}
+
+float Spectrum::getPeakBinFrequency(float minFreq, float maxFreq) const {
+    auto startBin = getBinOfFrequency(minFreq);
+    auto endBin = getBinOfFrequency(maxFreq);
+
+    auto maxIndex = std::max_element(m_bins.begin() + startBin, m_bins.begin() + endBin) - m_bins.begin();
+
+    return getFrequencyOfBin(maxIndex);
+}
+
 SpectrumAnalyzer::SpectrumAnalyzer(std::shared_ptr<AudioDevice>& _audioDevice,
 	unsigned int _blockSize)
 	:	workUnit(std::make_unique<boost::asio::io_service::work>(ioService))
